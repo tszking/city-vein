@@ -16,7 +16,7 @@ logger = logging.getLogger()
 class city_vein():
     def __init__(self, city_zh, web_key, js_key, line_type=0):
         self.city_zh = city_zh
-        self.city_en = ''.join(pypinyin.lazy_pinyin(self.city_zh))
+        self.city_en = ''.join(pypinyin.lazy_pinyin(self.city_zh))  # 中文转拼音
         self.city_si = ''.join([i[0] for i in pypinyin.lazy_pinyin(self.city_zh)])
         self.city_en = 'hongkong' if self.city_zh == '香港' else self.city_en
         self.city_en = 'taizhou2' if self.city_zh == '台州' else self.city_en
@@ -93,6 +93,7 @@ class city_vein():
             content = response.content
             content = dict(eval(content))
 
+            ###########################################################################
             status = content['status']
             buslines = content['buslines']
 
@@ -134,10 +135,12 @@ class city_vein():
         return lng, lat
 
     def _get_all_lines(self, digits=4):
+        # 从8684网爬取所有公交线路名称
         _, lines = self._get_all_buses() if self.line_type == 0 else self._get_all_subways()
         lines_info = []
         for line in tqdm(lines):
             # logger.info("get line info: %s" % line)
+            # 获取线路的
             start_time, end_time, polyline = self._get_line_info(line_name=line)
             if polyline != None:
                 polypoints = polyline.split(';')
@@ -148,7 +151,7 @@ class city_vein():
                 for polypoint in polypoints:
                     x = float(polypoint.split(',')[0])
                     y = float(polypoint.split(',')[1])
-                    x, y = self._transfer(x, y)
+                    x, y = self._transfer(x, y)  # 高德坐标系转换
                     x, y = round(x, digits), round(y, digits)
                     polyX.append(x)
                     polyY.append(y)
@@ -221,9 +224,10 @@ class city_vein():
 
 
 if __name__ == "__main__":
-    web_key = ''
-    js_key = ''
-    city_zh = ''
+    web_key = '0dc8e19e8002085b46a6df8517cf34d4'
+    js_key = '7062f37c84f6c388b0364ea829e3f16b'
+    # js_key = '0dc8e19e8002085b46a6df8517cf34d4'
+    city_zh = '广州'
     obj = city_vein(
         city_zh=city_zh,
         web_key=web_key,
